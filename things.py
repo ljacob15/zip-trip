@@ -8,11 +8,6 @@ class Place():
         self.terminal = None
         for item in attributeDict:
             setattr(self, item, attributeDict[item])
-        if self.terminal != ("D" or "E"):
-            self.terminal = -1
-        else:
-            terminalCodes = {"D": 0, "E": 1}
-            self.terminal = terminalCodes[self.terminal]
         
     def __str__(self):
         try:

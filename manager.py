@@ -22,11 +22,18 @@ class RecommendationManager():
     def generate_recommendations(self):
         rawPlacesDict = placeExtractor.extract_places()
         productCodes, foodCodes = preferencePreProc.generate_codes()
-        cleanPlacesDict = preferencePreProc.clean_places(rawPlacesDict,
-                                                         productCodes, foodCodes)
-        return cleanPlacesDict
-        # finalMatrixDict = preferencePreProc.generate_place_matrices(cleanPlacesDict)
-        # return finalMatrixDict
+        cleanPlacesDict = preferencePreProc.clean_places(placesDict = rawPlacesDict,
+                                                         productCodesDict = productCodes, 
+                                                         foodCodesDict = foodCodes)
+        c1Categs, c2Categs, timeLeft = pathConstructor.generate_fake_categories()
+        c1cxPlaces, c2cyPlaces = pathConstructor.find_path(cleanPlacesDict,
+                                                           c1Categs, 
+                                                           c2Categs,
+                                                           terminal = 0, 
+                                                           gate = 20, 
+                                                           timeLeft = timeLeft)
+        return c1cxPlaces, c2cyPlaces
+                                                           
 
         #matrix = preferencePreProc.pre_process(placesDict)
         #feed the matrix into the engine

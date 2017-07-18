@@ -27,7 +27,9 @@ def generate_codes():
 
 
 def clean_places(placesDict, productCodesDict, foodCodesDict):
-
+    '''placesDict = raw dictionary of all Places
+    productCodeDict = dict mapping product Type to product code
+    foodCodeDict = dict mapping food Type to food code'''
     for placeID in placesDict:
         #set food codes and prodcut codes variables
         currentPlace = placesDict[placeID]
@@ -36,8 +38,7 @@ def clean_places(placesDict, productCodesDict, foodCodesDict):
             productType = productType.lower()
             productType = productType.strip()
             productCode = productCodesDict[productType]
-            print(type(productCode))
-            assert type(productCode) != list, "ProductCode is not int"
+#            assert type(productCode) == int, "productCode is not int"
             setattr(currentPlace, "productCode", productCode)
         if currentPlace.foodType != -1:
             foodCodeList = []
@@ -51,8 +52,8 @@ def clean_places(placesDict, productCodesDict, foodCodesDict):
             foodCode = -1
             if len(foodCodeList) > 0:
                 foodCode = foodCodeList[0]
-            assert type(foodCode) == int, "ProductCode is not int"
-            setattr(currentPlace, "foodCode", foodCodeList)
+#            assert type(foodCode) == int, "foodCode is not int"
+            setattr(currentPlace, "foodCode", foodCode)
 
         #set variables for opening hour and closing hours
         hours = currentPlace.openHours
@@ -68,12 +69,25 @@ def clean_places(placesDict, productCodesDict, foodCodesDict):
         setattr(currentPlace, "hoursList", hoursList)
     return placesDict
 
+    #set terminal codes (D = 0, E = 1)
+    if self.terminal != ("D" or "E"):
+        self.terminal = -1
+    else:
+        terminalCodes = {"D": 0, "E": 1}
+        self.terminal = terminalCodes[self.terminal]
+        
+    #clean up nearestGate column
+    if type(self.nearestGate) != None and self.nearestGate != -1:
+        self.nearestGate.strip()
+        self.nearestGate = int(self.nearestGate[1:])
+
+
 def generate_place_matrices(cleanPlacesDict):
     finalMatrixDict = {}
     for placeID in cleanPlacesDict:
         place = cleanPlacesDict[placeID]
         if place.classCode == 1:
-            columnList = ['productCode', 'foodCode', 'priceRange',
+            columnList = ['priceRange',
                           'water', 'soda', 'candy',
                           'reading', 'tech', 'takeout', 'bar', 'kids']
             finalMatrix = np.zeros( shape = (1,len(columnList)) )
@@ -83,3 +97,4 @@ def generate_place_matrices(cleanPlacesDict):
 
             finalMatrixDict[placeID] = finalMatrix
     return finalMatrixDict
+
