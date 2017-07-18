@@ -3,85 +3,41 @@ import things
 import pandas as pd
 import numpy as np
 
-def generate_codes():
-    #construct diciotnary mapping product types to productCodes
-    productCodesDF = pd.read_excel('productCodes.xlsx', header = 0)
-    productCodesDict = {}
-    for i in range(productCodesDF.shape[0]):
-        row = productCodesDF.iloc[i]
-        key = row.iloc[1].lower()
-        key = key.strip()
-        value = row.iloc[0]
-        productCodesDict[key] = value
 
-    #construct diciotnary mapping product types to productCodes
-    foodCodesDF = pd.read_excel('foodCodes.xlsx', header = 0)
-    foodCodesDict = {}
-    for i in range(foodCodesDF.shape[0]):
-        row = foodCodesDF.iloc[i]
-        key = row.iloc[1]
-        value = row.iloc[0]
-        foodCodesDict[key] = value
-    return productCodesDict, foodCodesDict
-
-
-
-def clean_places(placesDict, productCodesDict, foodCodesDict):
-    '''placesDict = raw dictionary of all Places
-    productCodeDict = dict mapping product Type to product code
-    foodCodeDict = dict mapping food Type to food code'''
-    for placeID in placesDict:
-        #set food codes and prodcut codes variables
-        currentPlace = placesDict[placeID]
-        productType = currentPlace.productType
-        if productType != -1:
-            productType = productType.lower()
-            productType = productType.strip()
-            productCode = productCodesDict[productType]
-#            assert type(productCode) == int, "productCode is not int"
-            setattr(currentPlace, "productCode", productCode)
-        if currentPlace.foodType != -1:
-            foodCodeList = []
-            foodTypeList = currentPlace.foodType.split(",")
-            for item in foodCodesDict:
-                for foodType in foodTypeList:
-                    if foodType in item:
-                        foodCodeList.append(foodCodesDict[item])
-            Set = set(foodCodeList)
-            foodCodeList = list(Set)
-            foodCode = -1
-            if len(foodCodeList) > 0:
-                foodCode = foodCodeList[0]
-#            assert type(foodCode) == int, "foodCode is not int"
-            setattr(currentPlace, "foodCode", foodCode)
-
-        #set variables for opening hour and closing hours
-        hours = currentPlace.openHours
-        openIntervalsList = hours.split(",")
-        hoursList = []
-        for hours in openIntervalsList:
-            singleHours = hours.split("-")
-            for hour in singleHours:
-                hour = hour.strip()
-                hour = hour.replace(":", "")
-                hoursList.append(hour)
+def clean_users(inputDF):
+    '''userDF = dataframe of user info to clean'''
+    userDF = inputDF.copy()
+    #gender codes
+    genderCodes = {"F": 0, "M":1, "O":2}
+    #type codes
+    typeCodes = {"B":0, "L":1}
+    #cabinPreference codes
+    cabinPreferenceCodes = {"B": 0, "F":1, "Q":2, "Y":3}
+    #userType codes
+    userTypeCodes = {"Business": 1, "Frugal Spender": 2,
+                     "Medium Spender": 3, "Medium High Spender": 4,
+                     "High Spender":5}
+    for i in userDF.index:
+        userDF.loc[i,'gender'] = genderCodes[userDF.loc[i,'gender']]
+        userDF.loc[i,'type'] = typeCodes[userDF.loc[i,'type']]
+        userDF.loc[i,'cabinPreference'] = cabinPreferenceCodes[userDF.loc[i,'cabinPreference']]
+        targets = None
+        #if the data is training data, therefore containing a labels column
 #        import pdb; pdb.set_trace()
-        setattr(currentPlace, "hoursList", hoursList)
-    return placesDict
+        if "userType" in userDF.columns:
+            userDF.loc[i,'userType'] = userTypeCodes[userDF.loc[i,'userType']]
+    if 'userType' in userDF.columns:
+        #extract the column with the labels
+        targets = userDF.loc[:,'userType']
+        targets = list(targets)
+        #drop the labels from the training set
+        userDF = userDF.drop(labels = "userType", axis = 1)
+        finalMatrix = np.array(userDF)
+        return finalMatrix, targets
+    finalMatrix = np.array(userDF)
+    return finalMatrix
 
-    #set terminal codes (D = 0, E = 1)
-    if self.terminal != ("D" or "E"):
-        self.terminal = -1
-    else:
-        terminalCodes = {"D": 0, "E": 1}
-        self.terminal = terminalCodes[self.terminal]
-        
-    #clean up nearestGate column
-    if type(self.nearestGate) != None and self.nearestGate != -1:
-        self.nearestGate.strip()
-        self.nearestGate = int(self.nearestGate[1:])
-
-
+'''
 def generate_place_matrices(cleanPlacesDict):
     finalMatrixDict = {}
     for placeID in cleanPlacesDict:
@@ -97,4 +53,4 @@ def generate_place_matrices(cleanPlacesDict):
 
             finalMatrixDict[placeID] = finalMatrix
     return finalMatrixDict
-
+'''

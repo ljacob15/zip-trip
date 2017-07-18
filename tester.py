@@ -3,10 +3,9 @@ import things
 
 
 def main():
-    Bob = things.create_fake_user()
+    #Bob = things.create_fake_user()
 
     rm = manager.RecommendationManager()
-
     final = rm.generate_recommendations()
     return final
 
@@ -15,6 +14,6 @@ def main():
 if __name__=='__main__':
     from datetime import datetime
     startTime = datetime.now()
-    result = main()
+    c1, c2 = main()
     endTime = datetime.now()
     print("Time Taken = " + str(endTime - startTime))

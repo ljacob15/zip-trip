@@ -28,9 +28,9 @@ def generate_fake_categories():
     print(c1FinalCategs)
     print(c2FinalCategs)
     return c1FinalCategs, c2FinalCategs, timeLeft
-        
-def find_path(cleanPlacesDict, c1Categs, c2Categs, terminal, gate, timeLeft):
-    #generate dict of Class 1 places that are from a 
+
+def generate_places(cleanPlacesDict, c1Categs, c2Categs, terminal, gate, timeLeft):
+    #generate dict of Class 1 places that are from a
     #category in the c1Categs list
     c1cxPlaces = {}
     #same for Class 2 places that are from a category in c2Categs
@@ -43,22 +43,24 @@ def find_path(cleanPlacesDict, c1Categs, c2Categs, terminal, gate, timeLeft):
             c2cyPlaces[placeID] = place
     return c1cxPlaces, c2cyPlaces
 
-#left: use brute force or better to generate all paths from c1cx and c2cy Places
-#If get_path_time of any pathList is > timeLeft, then delete it
-#for all remaining paths, calculate engineScore and onlineScore. 
-#weight and add to get pathTotalScore. 
-#return path with highest pathTotalScore.
+
+def find_path(paths):
+    #left: use brute force or better to generate all paths from c1cx and c2cy Places
+    #If get_path_time of any pathList is > timeLeft, then delete it
+    #for all remaining paths, calculate engineScore and onlineScore.
+    #weight and add to get pathTotalScore.
+    #return path with highest pathTotalScore.
+    pass
 
 
-            
 def get_path_time(placesPath, finalGate, timeLeft):
     #all in minutes
     #minimum wait times for each category - slightly understated
-    #lower wait times result in more suggestions, 
+    #lower wait times result in more suggestions,
     #allowing the user to make the final call on how much time she has
     #all times in minutes
-    minCategoryWaits = [0, 15, 7, 15, 40, 7, 10, 10, 
-                   15, 5, 10, 10, 15, 15, 5, 
+    minCategoryWaits = [0, 15, 7, 15, 40, 7, 10, 10,
+                   15, 5, 10, 10, 15, 15, 5,
                    5, 10, 0, 10, 0, 5, 5]
     avgInterGateWalkTime = 0.5
     totalTime = 0
@@ -79,8 +81,3 @@ def get_path_time(placesPath, finalGate, timeLeft):
     buffer = 0.1 * timeLeft
     totalTime += lastWaitTime + lastDistance + buffer
     return totalTime
-            
-    
-        
-    
-    
