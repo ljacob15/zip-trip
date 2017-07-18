@@ -10,7 +10,7 @@ def generate_categs(filer = 'userTypeCategoryWeights.xlsx', userTypeWeights = No
     #current includes only categories Ray has data for
     #although there are a few more categories on the weightTable
     c1Categs = [2, 3, 4, 6, 7, 21]
-    c2Categs = [5, 8, 9, 10, 11, 12, 13, 18, 19, 23]
+    c2Categs = [5, 8, 9, 10, 11, 12, 13,] #18, 19,]
     weightTable = pd.read_excel(filer, header = 0, index_col = 0)
     weightTable = weightTable.drop(labels = "description", axis = 1)
     for weight in userTypeWeights:

@@ -1,3 +1,8 @@
+#pathPreProc
+import pandas as pd
+from collections import OrderedDict
+
+
 def generate_codes():
     #construct diciotnary mapping product types to productCodes
     productCodesDF = pd.read_excel('productCodes.xlsx', header = 0)
@@ -61,16 +66,89 @@ def clean_places(placesDict, productCodesDict, foodCodesDict):
                 hoursList.append(hour)
 #        import pdb; pdb.set_trace()
         setattr(currentPlace, "hoursList", hoursList)
+
+        #set terminal codes (D = 0, E = 1)
+        if currentPlace.terminal != ("D" or "E"):
+            currentPlace.terminal = -1
+        else:
+            terminalCodes = {"D": 0, "E": 1}
+            currentPlace.terminal = terminalCodes[currentPlace.terminal]
+    
+        #clean up nearestGate column
+        if type(currentPlace.nearestGate) != None and currentPlace.nearestGate != -1:
+            currentPlace.nearestGate = currentPlace.nearestGate.strip()
+            currentPlace.nearestGate = int(currentPlace.nearestGate[1:])
+            
     return placesDict
 
-    #set terminal codes (D = 0, E = 1)
-    if self.terminal != ("D" or "E"):
-        self.terminal = -1
-    else:
-        terminalCodes = {"D": 0, "E": 1}
-        self.terminal = terminalCodes[self.terminal]
+def get_places(cleanPlacesDict, c1Categs, c2Categs, terminal, timeLeft):
+    '''cleanPlacesDict = dictionary mapping ids to places in the airport
+    all place attributes are clean, numerical codes
+    c1Categs = ranked list of categories that user is predicted to prefer
+    (same for c2Categs)
+    terminal = 0 for terminal D, 1 for terminal E
+    timeLeft = integer value, time remaining in minutes'''
+    #narrow down the category lists based on the timeLeft
+    timesLeft = [10000, 240, 180, 120, 90, 60, 45, 30, 20]
+    c1Nums =    [6, 6, 5, 4, 3, 2, 1, 1, 0]
+    c2Nums =    [7, 5, 4, 3, 3, 2, 2, 1, 1]
+    
+    for i in range(len(timesLeft)):
+        if timeLeft <= timesLeft[i]:
+            c1Num = c1Nums[i]
+            c2Num = c2Nums[i]
+    c1NarrowedCategs = c1Categs[:c1Num]
+    c2NarrowedCategs = c2Categs[:c2Num]
+    #now we have narrowed category lists that the user has time for (estimated)
+    
+    #next, find all places (in the relevant terminal) in those categories
 
-    #clean up nearestGate column
-    if type(self.nearestGate) != None and self.nearestGate != -1:
-        self.nearestGate.strip()
-        self.nearestGate = int(self.nearestGate[1:])
+    #Dictionary ensures we keep the category information
+    #Ordered Dict ensures the categories are still ranked
+    class1CPMap = OrderedDict()
+    class2CPMap = OrderedDict()
+    
+    for category in c1NarrowedCategs:
+        class1CPMap[category] = []
+        for placeID in cleanPlacesDict:
+            place = cleanPlacesDict[placeID]
+            if place.categoryCode == category and place.terminal == terminal:
+                class1CPMap[category].append(place)
+                
+    for category in c2NarrowedCategs:
+        class2CPMap[category] = []
+        for placeID in cleanPlacesDict:
+            place = cleanPlacesDict[placeID]
+            if place.categoryCode == category and place.terminal == terminal:
+                class2CPMap[category].append(place)
+                
+    return class1CPMap, class2CPMap
+        
+    
+        
+'''   
+def generate_fake_categories():
+    c1Categs = [2, 3, 4, 6, 7, 21]
+    c2Categs = [5, 8, 9, 10, 11, 12, 13, 18, 19]
+    timesLeft = [240, 180, 120, 90, 60, 45, 30]
+    c1Nums =    [6, 5, 4, 3, 2, 1, 1]
+    c2Nums =    [6, 5, 4, 3, 2, 2, 1]
+    randomIndex = rand.randint(0,6)
+    #based on the timetoBoard, choose x Class 1 and y Class2
+    #categories to feed into phase 2
+    timeLeft = timesLeft[randomIndex]
+    c1Num = c1Nums[randomIndex]
+    c2Num = c2Nums[randomIndex]
+    c1FinalCategs = []
+    c2FinalCategs = []
+    #resemble output of the machine
+    #list of class 1 and class 2 categories the user will prefer
+    c1FinalCategs = rand.sample(c1Categs, c1Num)
+    c2FinalCategs = rand.sample(c2Categs, c2Num)
+    print(timeLeft)
+    print(c1Num)
+    print(c2Num)
+    print(c1FinalCategs)
+    print(c2FinalCategs)
+    return c1FinalCategs, c2FinalCategs, timeLeft
+'''

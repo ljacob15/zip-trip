@@ -45,11 +45,9 @@ class RecommendationManager():
         #generate ranked lists of Class 1 and Class 2 categoryCodes
         #this two ranked lists get fed into Phase 2
         c1Categs, c2Categs = preferencePostProc.generate_categs(userTypeWeights = bobProbs)
-        return c1Categs, c2Categs
        
         '''END PHASE 1, START PHASE 2'''
         
-        '''
         #extract and clean places
         rawPlacesDict = extractor.extract_places(filer = "placeAttributes.xlsx")
         productCodes, foodCodes = pathPreProc.generate_codes()
@@ -61,17 +59,24 @@ class RecommendationManager():
         #use Bob's ranked Category lists and the timeLeft to generate
         #a list of categories we'd like bob to visit. Then use that list to generate
         #a list of places we'd like bob to visit.
-        class1Places, class2Places = pathPreProc.get_places(c1Categs, c2Categs)
+        c1PlacesDict, c2PlacesDict = pathPreProc.get_places(cleanPlacesDict, 
+                                                            c1Categs, 
+                                                            c2Categs,
+                                                            self.terminal, 
+                                                            self.timeLeft, 
+                                                            self.timeWeight, 
+                                                            self.onlineWeight)
+        
+        return c1PlacesDict, c2PlacesDict
         #from the places, construct paths from current location through Places and to gate.
         #use the search algorithm to find the best path (shortest and best onlineRating)
-
-        c1cxPlaces, c2cyPlaces = pathConstructor.find_path(cleanPlacesDict,
-                                                           c1Categs,
-                                                           c2Categs,
-                                                           terminal = 0,
-                                                           gate = 20,
-                                                           timeLeft = timeLeft)
-
-        #return the best path
-        
         '''
+        path = pathConstructor.find_path(cleanPlacesDict, c1PlacesDict,
+                                         c2PlacesDict, self.flightGate, 
+                                         self.location, self.timeLeft)
+        
+
+        return path
+        '''
+        
+        
