@@ -2,6 +2,7 @@ import things
 
 import pandas as pd
 import numpy as np
+import pdb
 
 
 def clean_users(inputDF):
@@ -35,6 +36,7 @@ def clean_users(inputDF):
         finalMatrix = np.array(userDF)
         return finalMatrix, targets
     finalMatrix = np.array(userDF)
+    # pdb.set_trace()
     return finalMatrix
 
 '''

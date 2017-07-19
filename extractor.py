@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy
 import things
+import pdb
 
 def extract_places(filer = 'placeAttributes.xlsx'):
     #this list will store the places, indexed by their placeID's.
@@ -24,11 +25,13 @@ def extract_places(filer = 'placeAttributes.xlsx'):
         idNum = placeObject.get_id()
         #add new Place to dictionary
         placesDict[idNum] = placeObject
+    # pdb.set_trace()
     return placesDict
 
 def extract_users(filer = 'userTrainData.xlsx'):
     #get user info from csv
     dataFrame = pd.read_excel(filer, header = 0, index_col = 0 )
+    # pdb.set_trace()
     return dataFrame
 
 

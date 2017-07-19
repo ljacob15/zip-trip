@@ -1,7 +1,7 @@
 #pathPreProc
 import pandas as pd
 from collections import OrderedDict
-
+import pdb
 
 def generate_codes():
     #construct diciotnary mapping product types to productCodes
@@ -73,15 +73,16 @@ def clean_places(placesDict, productCodesDict, foodCodesDict):
         else:
             terminalCodes = {"D": 0, "E": 1}
             currentPlace.terminal = terminalCodes[currentPlace.terminal]
-    
+
         #clean up nearestGate column
         if type(currentPlace.nearestGate) != None and currentPlace.nearestGate != -1:
             currentPlace.nearestGate = currentPlace.nearestGate.strip()
             currentPlace.nearestGate = int(currentPlace.nearestGate[1:])
-            
+    # pdb.set_trace()
     return placesDict
 
-def get_places(cleanPlacesDict, c1Categs, c2Categs, terminal, timeLeft):
+def get_places(cleanPlacesDict, c1Categs, c2Categs,
+               terminal, timeLeft, currentTimeOG):
     '''cleanPlacesDict = dictionary mapping ids to places in the airport
     all place attributes are clean, numerical codes
     c1Categs = ranked list of categories that user is predicted to prefer
@@ -101,33 +102,44 @@ def get_places(cleanPlacesDict, c1Categs, c2Categs, terminal, timeLeft):
     c1NarrowedCategs = c1Categs[:c1Num]
     c2NarrowedCategs = c2Categs[:c2Num]
     #now we have narrowed category lists that the user has time for (estimated)
-    
     #next, find all places (in the relevant terminal) in those categories
 
-    #Dictionary ensures we keep the category information
+    #Dictionary ensures we keep the category by category information
     #Ordered Dict ensures the categories are still ranked
     class1CPMap = OrderedDict()
     class2CPMap = OrderedDict()
-    
+
     for category in c1NarrowedCategs:
         class1CPMap[category] = []
         for placeID in cleanPlacesDict:
             place = cleanPlacesDict[placeID]
-            if place.categoryCode == category and place.terminal == terminal:
+            openTag = False
+            currentHour = currentTimeOG.hour
+            currentMinute = currentTimeOG.minute
+            currentTime = currentHour*100+ currentMinute
+            # pdb.set_trace()
+            if len (place.hoursList) == 2:
+                if  int(place.hoursList[0]) < currentTime < int(place.hoursList[1])-15:
+                    openTag = True
+            if len (place.hoursList) > 2:
+                if  int(place.hoursList[0]) < currentTime < int(place.hoursList[1])-15:
+                    openTag = True
+                if  int(place.hoursList[2]) < currentTime < int(place.hoursList[3])-15:
+                    openTag = True
+            if place.categoryCode == category and place.terminal == terminal and openTag == True:
                 class1CPMap[category].append(place)
-                
+
     for category in c2NarrowedCategs:
         class2CPMap[category] = []
         for placeID in cleanPlacesDict:
             place = cleanPlacesDict[placeID]
-            if place.categoryCode == category and place.terminal == terminal:
+            if place.categoryCode == category and place.terminal == terminal and openTag == True:
                 class2CPMap[category].append(place)
-                
     return class1CPMap, class2CPMap
-        
-    
-        
-'''   
+
+
+
+'''
 def generate_fake_categories():
     c1Categs = [2, 3, 4, 6, 7, 21]
     c2Categs = [5, 8, 9, 10, 11, 12, 13, 18, 19]
