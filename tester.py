@@ -1,5 +1,4 @@
 import manager
-import things
 
 
 def main():
@@ -10,10 +9,9 @@ def main():
     return final
 
 
-
 if __name__=='__main__':
     from datetime import datetime
     startTime = datetime.now()
-    c1, c2 = main()
+    result = main()
     endTime = datetime.now()
     print("Time Taken = " + str(endTime - startTime))

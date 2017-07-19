@@ -89,10 +89,11 @@ def get_places(cleanPlacesDict, c1Categs, c2Categs, terminal, timeLeft):
     terminal = 0 for terminal D, 1 for terminal E
     timeLeft = integer value, time remaining in minutes'''
     #narrow down the category lists based on the timeLeft
-    timesLeft = [10000, 240, 180, 120, 90, 60, 45, 30, 20]
-    c1Nums =    [6, 6, 5, 4, 3, 2, 1, 1, 0]
-    c2Nums =    [7, 5, 4, 3, 3, 2, 2, 1, 1]
-    
+    timesLeft = [240, 180, 120, 90, 60, 45, 30, 20]
+    c1Nums =    [6, 5, 4, 3, 2, 1, 1, 0]
+    c2Nums =    [5, 4, 3, 3, 2, 2, 1, 1]
+    c1Num = 6
+    c2Num = 7
     for i in range(len(timesLeft)):
         if timeLeft <= timesLeft[i]:
             c1Num = c1Nums[i]

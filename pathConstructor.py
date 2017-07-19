@@ -1,12 +1,12 @@
 import math
-from collections import OrderedDict
+import itertools
 
 class Path():
-    def __init__(self, placeList, flightGate, location, 
+    def __init__(self, placeTuple, flightGate, location, 
                  timeLeft, timeWeight, onlineWeight):
-        self.placeList = placeList
-        self.timeToTake = self.get_path_time(placeList, flightGate, location, timeLeft)
-        self.avgScore = self.get_path_score(placeList)
+        self.placeList = placeTuple
+        self.timeToTake = self.get_path_time(placeTuple, flightGate, location, timeLeft)
+        self.avgScore = self.get_path_score(placeTuple)
         self.totalScore = self.get_total_score(timeWeight, onlineWeight)
         
     def get_path_time(self, placeList, flightGate, location, timeLeft):
@@ -30,14 +30,18 @@ class Path():
             place2 = placeList[i+1]
             assert place1.terminal == place2.terminal, "places in different terminals"
             #get wait time at first place
-            waitTime = minCategoryWaits[place1.categoryCode]
+            floatCode = place1.categoryCode
+            intCode = int(floatCode)
+            waitTime = minCategoryWaits[intCode]
             #get walking time to the next place
             distance = math.fabs(place2.nearestGate-place1.nearestGate)
             walkingTime = distance*avgInterGateWalkTime
             totalTime += waitTime + walkingTime
         #get wait time for last Place
         lastPlace = placeList[-1]
-        lastWaitTime = minCategoryWaits[lastPlace.categoryCode]
+        floatCode = lastPlace.categoryCode
+        intCode = int(floatCode)
+        lastWaitTime = intCode
         #get time to walk from last place to flight gate
         lastWalkDistance = math.fabs(flightGate - lastPlace.terminal)
         lastWalkTime = lastWalkDistance * avgInterGateWalkTime
@@ -61,12 +65,12 @@ class Path():
         weightedavgScore = self.avgScore * onlineWeight
         totalScore = weightedTimeToTake + weightedavgScore
         return totalScore
-                
-
         
-        
-        
-    
+    def get_place_names(self):
+        placeNames = []
+        for place in self.placeList:
+            placeNames.append(place.placeName)
+        return placeNames
 
 def find_path(cleanPlacesDict, c1Places, c2Places, 
               flightGate, location, timeLeft, timeWeight, onlineWeight):
@@ -81,11 +85,34 @@ def find_path(cleanPlacesDict, c1Places, c2Places,
     operation: uses brute force to construct all possible paths from user
     through one place in each category and to the Gate. 
     Finds best path regarding distance and online rating.'''
+    allPaths = []
+    combinedDict = {**c1Places, **c2Places}
+    categoryPlaceList = []
+    for category in combinedDict:
+        if len(combinedDict[category]) > 0:
+            categoryPlaceList.append(combinedDict[category])
+    for path in itertools.product(*categoryPlaceList):
+        pathObject = Path(path, flightGate, location, timeLeft, 
+                          timeWeight, onlineWeight)
+        allPaths.append(pathObject)
+        
+    #eliminate all paths whose time is more than timeLeft
+    shortPaths = []
+    for path in allPaths:
+        if path.timeToTake < timeLeft:
+            shortPaths.append(path)
+            
+    #rank the remaining paths by their totalScore 
+    orderedPaths = sorted(shortPaths, 
+                          key = lambda x: x.totalScore, reverse = True)
+    bestPath = orderedPaths[0]
+    placeNames = bestPath.get_place_names()
+    return placeNames
+
     
-    #left: use brute force or better to generate all paths from c1cx and c2cy Places
-    #If get_path_time of any pathList is > timeLeft, then delete it
-    #return path with highest path.totalScore
-    pass
+    #if not brute force, then greedy! Every next place is the closest place.
+    #but this will need to take into account the onlineWeight Somehow.
+
 
 
 

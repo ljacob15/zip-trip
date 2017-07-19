@@ -63,20 +63,18 @@ class RecommendationManager():
                                                             c1Categs, 
                                                             c2Categs,
                                                             self.terminal, 
-                                                            self.timeLeft, 
-                                                            self.timeWeight, 
-                                                            self.onlineWeight)
+                                                            self.timeLeft)
         
-        return c1PlacesDict, c2PlacesDict
         #from the places, construct paths from current location through Places and to gate.
         #use the search algorithm to find the best path (shortest and best onlineRating)
-        '''
+        
         path = pathConstructor.find_path(cleanPlacesDict, c1PlacesDict,
                                          c2PlacesDict, self.flightGate, 
-                                         self.location, self.timeLeft)
+                                         self.location, self.timeLeft, 
+                                         self.timeWeight, self.onlineWeight)
         
 
         return path
-        '''
+        
         
         
