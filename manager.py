@@ -15,9 +15,10 @@ class RecommendationManager():
                  trainSet = 'userTrainData.xlsx',
                  testSet = 'userTestData.xlsx',
                  terminal = 0, flightGate = 17,
-                 currentTime = datetime.datetime(2017,7,19,16,30),
-                 boardingTime = datetime.datetime(2017,7,19,18,30),
-                 location = 34):
+                 currentTime = datetime.datetime(2017,7,19,9,00),
+                 boardingTime = datetime.datetime(2017,7,19,11,00),
+                 location = 34,
+                 userFoodCodes = None):
         self.timeWeight = timeWeight
         self.onlineWeight = onlineWeight
         self.userPrefWeight = userPrefWeight
@@ -36,17 +37,25 @@ class RecommendationManager():
         #bob will be User #1 from the userTestData
         #use the engine to train, test, and get Bob's userTypes
         userTrainDF = extractor.extract_users(filer = self.trainSet)
+        print("Training set constructed")
         userTestDF = extractor.extract_users(filer = self.testSet)
+        print("Testing set constructed")
         userTrainMatrix, labels = preferencePreProc.clean_users(userTrainDF)
         userTestMatrix = preferencePreProc.clean_users(userTestDF)
+        print("Training and testing sets cleaned")
         #return userTrainMatrix, labels, userTestMatrix
         bobProbs = preferenceEngine.predict_user_type(userTrainMatrix, labels,
                                                      userTestMatrix)
+        print("Bob's preferences predicted:")
+        print(bobProbs)
         #c1Categs, c2Categs, timeLeft = pathConstructor.generate_fake_categories()
         #using Bob's userTypes and the weighting file,
         #generate ranked lists of Class 1 and Class 2 categoryCodes
         #this two ranked lists get fed into Phase 2
         c1Categs, c2Categs = preferencePostProc.generate_categs(userTypeWeights = bobProbs)
+        print("Bob's preferred ordered categories generated:")
+        print(c1Categs)
+        print(c2Categs)
 
         '''END PHASE 1, START PHASE 2'''
 
@@ -56,7 +65,7 @@ class RecommendationManager():
         cleanPlacesDict = pathPreProc.clean_places(placesDict = rawPlacesDict,
                                                    productCodesDict = productCodes,
                                                    foodCodesDict = foodCodes)
-
+        print("Airport Places constructed and cleaned")
 
         #use Bob's ranked Category lists and the timeLeft to generate
         #a narrowed down list of categories we'd like bob to visit.

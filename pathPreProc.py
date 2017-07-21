@@ -82,7 +82,7 @@ def clean_places(placesDict, productCodesDict, foodCodesDict):
     return placesDict
 
 def get_places(cleanPlacesDict, c1Categs, c2Categs,
-               terminal, timeLeft, currentTimeOG):
+               terminal, timeLeft, currentTimeOG, userFoodCodes = None):
     '''cleanPlacesDict = dictionary mapping ids to places in the airport
     all place attributes are clean, numerical codes
     c1Categs = ranked list of categories that user is predicted to prefer
@@ -128,6 +128,14 @@ def get_places(cleanPlacesDict, c1Categs, c2Categs,
                     openTag = True
             if place.categoryCode == category and place.terminal == terminal and openTag == True:
                 class1CPMap[category].append(place)
+    #if the user has food preferences, only return places of those preferences
+    if userFoodCodes:
+        for category in class1CPMap:
+            placeList = class1CPMap[category]
+            for place in placeList:
+                if place.foodCode and place.foodCode not in userFoodCodes:
+                    placeList.remove(place)
+
 
     for category in c2NarrowedCategs:
         class2CPMap[category] = []

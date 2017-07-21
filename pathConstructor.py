@@ -119,6 +119,8 @@ def find_path(cleanPlacesDict, c1Places, c2Places,
     #rank the remaining paths by their totalScore
     orderedPaths = sorted(shortPaths,
                           key = lambda x: x.totalScore, reverse = True)
+    print("Number of possible paths:" + str(len(allPaths)))
+    print("Number of time-bound pahts:" + str(len(shortPaths)))
     bestPath = orderedPaths[0]
     placeNames = bestPath.get_place_names()
     return placeNames
