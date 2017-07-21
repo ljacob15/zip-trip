@@ -32,6 +32,7 @@ def clean_places(placesDict, productCodesDict, foodCodesDict):
     for placeID in placesDict:
         #set food codes and prodcut codes variables
         currentPlace = placesDict[placeID]
+        setattr(currentPlace,"productCode", None)
         productType = currentPlace.productType
         if productType != -1:
             productType = productType.lower()
@@ -39,6 +40,7 @@ def clean_places(placesDict, productCodesDict, foodCodesDict):
             productCode = productCodesDict[productType]
 #            assert type(productCode) == int, "productCode is not int"
             setattr(currentPlace, "productCode", productCode)
+        setattr(currentPlace,"foodCode", None)
         if currentPlace.foodType != -1:
             foodCodeList = []
             foodTypeList = currentPlace.foodType.split(",")
@@ -82,7 +84,7 @@ def clean_places(placesDict, productCodesDict, foodCodesDict):
     return placesDict
 
 def get_places(cleanPlacesDict, c1Categs, c2Categs,
-               terminal, timeLeft, currentTimeOG, userFoodCodes = None):
+               terminal, timeLeft, currentTimeOG, userFoodCodes):
     '''cleanPlacesDict = dictionary mapping ids to places in the airport
     all place attributes are clean, numerical codes
     c1Categs = ranked list of categories that user is predicted to prefer
@@ -134,7 +136,7 @@ def get_places(cleanPlacesDict, c1Categs, c2Categs,
             placeList = class1CPMap[category]
             for place in placeList:
                 if place.foodCode and place.foodCode not in userFoodCodes:
-                    placeList.remove(place)
+                        placeList.remove(place)
 
 
     for category in c2NarrowedCategs:

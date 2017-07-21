@@ -31,6 +31,7 @@ class RecommendationManager():
         self.timeLeft = boardingTime - currentTime
         self.timeLeft = float(self.timeLeft.seconds)/60.0
         self.location = location
+        self.userFoodCodes = userFoodCodes
 
     def generate_recommendations(self):
 
@@ -75,7 +76,8 @@ class RecommendationManager():
                                                             c2Categs,
                                                             self.terminal,
                                                             self.timeLeft,
-                                                            self.currentTime)
+                                                            self.currentTime,
+                                                            self.userFoodCodes)
 
         #from the places, construct paths from current location through Places and to gate.
         #use the search algorithm to find the best path (shortest and best onlineRating)

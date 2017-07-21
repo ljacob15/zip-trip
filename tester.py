@@ -8,6 +8,7 @@ def main():
     print("Standard Engine: When Bob clears security")
     startTime = datetime.now()
     rm = manager.RecommendationManager()
+    # rm = manager.RecommendationManager(boardingTime = datetime(2017,7,19,12,30))
     finalOne = rm.generate_recommendations()
     endTime = datetime.now()
     printer(finalOne)
@@ -21,7 +22,8 @@ def main():
     print("Working...")
     print()
     startTime = datetime.now()
-    rm = manager.RecommendationManager(boardingTime = datetime(2017,7,19,1,00))
+    # rm = manager.RecommendationManager()
+    rm = manager.RecommendationManager(boardingTime = datetime(2017,7,19,12,00))
     finalTwo = rm.generate_recommendations()
     endTime = datetime.now()
     printer(finalTwo)
@@ -31,9 +33,12 @@ def main():
     input("Press Enter to continue...")
 
     print("Updated Engine: When Bob changes his preferences")
+    print()
+    print("Working...")
+    print()
     startTime = datetime.now()
-    rm = manager.RecommendationManager(boardingTime = datetime(2017,7,19,1,00),
-                                       userFoodCodes = [15])
+    rm = manager.RecommendationManager(boardingTime = datetime(2017,7,19,12,00),
+                                       userFoodCodes = [5])
     finalThree = rm.generate_recommendations()
     endTime = datetime.now()
     printer(finalThree)
