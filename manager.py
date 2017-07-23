@@ -7,6 +7,8 @@ import pathPreProc
 import pathConstructor
 
 import datetime
+import subprocess
+import io
 import pdb
 
 
@@ -38,25 +40,40 @@ class RecommendationManager():
         #bob will be User #1 from the userTestData
         #use the engine to train, test, and get Bob's userTypes
         userTrainDF = extractor.extract_users(filer = self.trainSet)
-        print("Training set constructed")
+        # print("Training set constructed")
+        proc = subprocess.run("echo Training set constructed")
+
         userTestDF = extractor.extract_users(filer = self.testSet)
-        print("Testing set constructed")
+        # print("Testing set constructed")
+        subprocess.run("echo Testing set constructed")
+
         userTrainMatrix, labels = preferencePreProc.clean_users(userTrainDF)
         userTestMatrix = preferencePreProc.clean_users(userTestDF)
-        print("Training and testing sets cleaned")
+        # print("Training and testing sets cleaned")
+        subprocess.run("echo Training and testing sets cleaned")
+
         #return userTrainMatrix, labels, userTestMatrix
         bobProbs = preferenceEngine.predict_user_type(userTrainMatrix, labels,
                                                      userTestMatrix)
-        print("Bob's preferences predicted:")
-        print(bobProbs)
-        #c1Categs, c2Categs, timeLeft = pathConstructor.generate_fake_categories()
+        bobOut = str(bobProbs)
+        # print("Bob's preferences predicted:")
+        subprocess.run("echo Bob's preferences predicted:")
+        subprocess.run('cat', input = bobOut, universal_newlines = True)
+        subprocess.run('echo')
+
+        # print(bobProbs)
+
         #using Bob's userTypes and the weighting file,
         #generate ranked lists of Class 1 and Class 2 categoryCodes
-        #this two ranked lists get fed into Phase 2
         c1Categs, c2Categs = preferencePostProc.generate_categs(userTypeWeights = bobProbs)
-        print("Bob's preferred ordered categories generated:")
-        print(c1Categs)
-        print(c2Categs)
+        c1Out = str(c1Categs)
+        c2Out = str(c2Categs)
+        # print("Bob's preferred ordered categories generated:")
+        subprocess.run("echo Bob's preferred ordered categories generated:")
+        subprocess.run('cat', input = c1Out, universal_newlines = True)
+        subprocess.run('cat', input = c2Out, universal_newlines = True)
+        subprocess.run('echo')
+
 
         '''END PHASE 1, START PHASE 2'''
 
@@ -66,7 +83,8 @@ class RecommendationManager():
         cleanPlacesDict = pathPreProc.clean_places(placesDict = rawPlacesDict,
                                                    productCodesDict = productCodes,
                                                    foodCodesDict = foodCodes)
-        print("Airport Places constructed and cleaned")
+        # print("Airport Places constructed and cleaned")
+        subprocess.run("echo Airport Places constructed and cleaned")
 
         #use Bob's ranked Category lists and the timeLeft to generate
         #a narrowed down list of categories we'd like bob to visit.
@@ -81,8 +99,8 @@ class RecommendationManager():
 
         #from the places, construct paths from current location through Places and to gate.
         #use the search algorithm to find the best path (shortest and best onlineRating)
-        path = pathConstructor.find_path(cleanPlacesDict, c1PlacesDict,
+        bestPath = pathConstructor.find_path(cleanPlacesDict, c1PlacesDict,
                                          c2PlacesDict, self.flightGate,
                                          self.location, self.timeLeft,
                                          self.timeWeight, self.onlineWeight)
-        return path
+        return bestPath

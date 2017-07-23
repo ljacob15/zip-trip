@@ -1,6 +1,7 @@
 import math
 import itertools
 import pdb
+import subprocess
 
 class Path():
     def __init__(self, placeTuple, flightGate, location,
@@ -9,6 +10,16 @@ class Path():
         self.timeToTake = self.get_path_time(placeTuple, flightGate, location, timeLeft)
         self.avgOnlineScore = self.get_avg_online_score(placeTuple)
         self.totalScore = self.get_total_score(timeWeight, onlineWeight, timeLeft)
+        self.timeLeft = timeLeft
+
+    def __str__(self):
+        print("Time before boarding: " + str(self.timeLeft))
+        print()
+        print("Recommended Places:")
+
+        for place in self.placeList:
+            print(str(place) + " (nearest gate: " + str(place.nearestGate) + ")" )
+        return ''
 
     def get_path_time(self, placeList, flightGate, location, timeLeft):
         #all in minutes
@@ -105,25 +116,34 @@ def find_path(cleanPlacesDict, c1Places, c2Places,
     for category in combinedDict:
         if len(combinedDict[category]) > 0:
             categoryPlaceList.append(combinedDict[category])
+    import pdb; pdb.set_trace()
     for path in itertools.product(*categoryPlaceList):
         pathObject = Path(path, flightGate, location, timeLeft,
                           timeWeight, onlineWeight)
         allPaths.append(pathObject)
+    # print("Number of possible paths:" + str(len(allPaths)))
+    subprocess.run(['echo', '-n', 'Number of possible paths:'])
+    subprocess.run(['cat', '\n'],
+                   input = str(len(allPaths)), universal_newlines = True)
+    subprocess.run('echo')
 
     #eliminate all paths whose time is more than timeLeft
     shortPaths = []
     for path in allPaths:
         if path.timeToTake < timeLeft:
             shortPaths.append(path)
+    subprocess.run(['echo', '-n', 'Number of time-bound paths:'])
+    subprocess.run(['cat', '\n'],
+                   input = str(len(allPaths)), universal_newlines = True)
+    subprocess.run('echo')
 
     #rank the remaining paths by their totalScore
+    subprocess.run("echo Sorting paths by totalscore...")
     orderedPaths = sorted(shortPaths,
                           key = lambda x: x.totalScore, reverse = True)
-    print("Number of possible paths:" + str(len(allPaths)))
-    print("Number of time-bound pahts:" + str(len(shortPaths)))
+
     bestPath = orderedPaths[0]
-    placeNames = bestPath.get_place_names()
-    return placeNames
+    return bestPath
 
 
     #if not brute force, then greedy! Every next place is the closest place.
