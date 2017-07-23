@@ -6,7 +6,7 @@ import preferencePostProc
 import pathPreProc
 import pathConstructor
 
-import datetime
+from datetime import datetime
 import subprocess
 import io
 import pdb
@@ -17,8 +17,8 @@ class RecommendationManager():
                  trainSet = 'userTrainData.xlsx',
                  testSet = 'userTestData.xlsx',
                  terminal = 0, flightGate = 17,
-                 currentTime = datetime.datetime(2017,7,19,9,00),
-                 boardingTime = datetime.datetime(2017,7,19,11,00),
+                 currentTime = datetime(2017,7,19,9,00),
+                 boardingTime = datetime(2017,7,19,11,00),
                  location = 34,
                  userFoodCodes = None):
         self.timeWeight = timeWeight
@@ -93,6 +93,7 @@ class RecommendationManager():
                                                                             c1Categs,
                                                                             c2Categs,
                                                                             self.terminal,
+                                                                            self.location,
                                                                             self.timeLeft,
                                                                             self.currentTime,
                                                                             self.userFoodCodes)
@@ -101,7 +102,7 @@ class RecommendationManager():
             for place in preferredPlaces:
                 placeNames.append(place.placeName)
             subprocess.run("echo Bob's new preferences:")
-            subprocess.run('cat', input = preferredPlaces, universal_newlines = True)
+            subprocess.run('cat', input = str(placeNames), universal_newlines = True)
             subprocess.run('echo')
 
         #from the places, construct paths from current location through Places and to gate.

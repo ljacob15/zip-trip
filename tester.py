@@ -6,12 +6,15 @@ def main():
     #Bob = things.create_fake_user()
     messages = ["echo Standard Engine: When Bob clears security",
                 "echo Updated Engine: When Bob's flight is delayed",
-                "Updated Engine: When Bob changes his preferences"]
+                "echo Updated Engine: When Bob changes his preferences"]
     engines = [manager.RecommendationManager(),
-               manager.RecommendationManager(boardingTime = datetime(2017,7,19,12,00),
-                                                  location = 30),
-               manager.RecommendationManager(boardingTime = datetime(2017,7,19,12,00),
-                                                  userFoodCodes = [0,6])
+               manager.RecommendationManager(currentTime = datetime(2017,7,19,9,20),
+                                             boardingTime = datetime(2017,7,19,12,00),
+                                             location = 30),
+               manager.RecommendationManager(currentTime = datetime(2017,7,19,9,22),
+                                             boardingTime = datetime(2017,7,19,12,00),
+                                             location = 30,
+                                             userFoodCodes = [0,6])
                ]
     for i in range(3):
         run(messages[i], engines[i])

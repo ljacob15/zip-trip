@@ -6,11 +6,17 @@ import subprocess
 class Path():
     def __init__(self, placeTuple, flightGate, location,
                  timeLeft, timeWeight, onlineWeight):
-        self.placeList = placeTuple
-        self.timeToTake = self.get_path_time(placeTuple, flightGate, location, timeLeft)
-        self.avgOnlineScore = self.get_avg_online_score(placeTuple)
-        self.totalScore = self.get_total_score(timeWeight, onlineWeight, timeLeft)
+        self.placeList = list(placeTuple)
+        self.flightGate = flightGate
+        self.location = location
         self.timeLeft = timeLeft
+        self.timeWeight = timeWeight
+        self.onlineWeight = onlineWeight
+
+        self.sort_path()
+        self.timeToTake = self.get_path_time()
+        self.avgOnlineScore = self.get_avg_online_score()
+        self.totalScore = self.get_total_score()
 
     def __str__(self):
         print("Time before boarding: " + str(self.timeLeft))
@@ -21,7 +27,14 @@ class Path():
             print(str(place) + " (nearest gate: " + str(place.nearestGate) + ")" )
         return ''
 
-    def get_path_time(self, placeList, flightGate, location, timeLeft):
+    def sort_path(self):
+        '''placeList: list of places constituting a path
+        operation: orders the path based on distance from user
+        returns: orderedPlaceList '''
+        self.placeList = sorted(self.placeList,
+                                key = lambda x: math.fabs(x.nearestGate - self.location))
+
+    def get_path_time(self):
         #all in minutes
         #minimum wait times for each category - slightly understated
         #lower wait times result in more suggestions,
@@ -33,13 +46,13 @@ class Path():
         avgInterGateWalkTime = 0.5
         totalTime = 0
         #get time to walk to first place
-        firstWalkDistance = math.fabs(placeList[0].nearestGate - location)
+        firstWalkDistance = math.fabs(self.placeList[0].nearestGate - self.location)
         firstWalkTime = firstWalkDistance * avgInterGateWalkTime
         totalTime += firstWalkTime
         #loop through each two adjacent places
-        for i in range(len(placeList)-1):
-            place1 = placeList[i]
-            place2 = placeList[i+1]
+        for i in range(len(self.placeList)-1):
+            place1 = self.placeList[i]
+            place2 = self.placeList[i+1]
             assert place1.terminal == place2.terminal, "places in different terminals"
             #get wait time at first place
             floatCode = place1.categoryCode
@@ -50,43 +63,43 @@ class Path():
             walkingTime = distance*avgInterGateWalkTime
             totalTime += waitTime + walkingTime
         #get wait time for last Place
-        lastPlace = placeList[-1]
+        lastPlace = self.placeList[-1]
         floatCode = lastPlace.categoryCode
         intCode = int(floatCode)
-        lastWaitTime = intCode
+        lastWaitTime = minCategoryWaits[intCode]
         #get time to walk from last place to flight gate
-        lastWalkDistance = math.fabs(flightGate - lastPlace.nearestGate)
+        lastWalkDistance = math.fabs(self.flightGate - lastPlace.nearestGate)
         lastWalkTime = lastWalkDistance * avgInterGateWalkTime
-        bufferTime = 0.1 * timeLeft
+        bufferTime = 0.1 * self.timeLeft
         totalTime += lastWaitTime + lastWalkTime + bufferTime
         return totalTime
 
-    def get_avg_online_score(self, placeList):
+    def get_avg_online_score(self):
         totalScore = 0
         ratedPlaces = 0
-        for place in placeList:
+        for place in self.placeList:
             if place.onlineRating != -1:
                 totalScore += place.onlineRating
                 ratedPlaces += 1
         avgOnlineScore = float(totalScore)/float(ratedPlaces)
         return avgOnlineScore
 
-    def get_total_score(self, timeWeight, onlineWeight, timeLeft):
+    def get_total_score(self):
         '''weights are between 0 and 1, and should add to 1?
         yes because that would ensure that the min score is 0 and max score is 1
         ...highest score wins'''
         #express timeToTake as a percentage of the time remaining
-        normalizedTimeToTake = self.timeToTake/timeLeft
+        normalizedTimeToTake = self.timeToTake/self.timeLeft
         normalizedTimeToTake = 1 - normalizedTimeToTake
         #get the factor to scale the average online rating by
-        onlineScalingFactor = timeLeft/5.0
+        onlineScalingFactor = self.timeLeft/5.0
         #scale the avg online score so that the max, 5, equals the timeLeft
         scaledOnlineScore = self.avgOnlineScore * onlineScalingFactor
         #normalize the scaled online score by finding percentage of timeLeft
-        normalizedOnlineScore = scaledOnlineScore / timeLeft
+        normalizedOnlineScore = scaledOnlineScore / self.timeLeft
         #weight both of the newly scaled scores
-        weightedTimeToTake = normalizedTimeToTake * timeWeight
-        weightedOnlineScore = normalizedOnlineScore * onlineWeight
+        weightedTimeToTake = normalizedTimeToTake * self.timeWeight
+        weightedOnlineScore = normalizedOnlineScore * self.onlineWeight
         #calculate final total Score
         totalScore = weightedTimeToTake + weightedOnlineScore
         return totalScore
@@ -110,12 +123,13 @@ def find_path(cleanPlacesDict, c1Places, c2Places,
     operation: uses brute force to construct all possible paths from user
     through one place in each category and to the Gate.
     Finds best path regarding distance and online rating.'''
+    #combine the two dictionaries and turn into a (simpler) list of lists
     combinedDict = {**c1Places, **c2Places}
     categoryPlaceList = []
     for category in combinedDict:
         if len(combinedDict[category]) > 0:
             categoryPlaceList.append(combinedDict[category])
-    import pdb; pdb.set_trace()
+    #get all combinations
     combos = []
     for path in product(*categoryPlaceList):
         combos.append(path)
@@ -139,14 +153,25 @@ def find_path(cleanPlacesDict, c1Places, c2Places,
                    input = str(len(allPaths)), universal_newlines = True)
     subprocess.run('echo')
 
+    # testing function
+    # def different(oldPathList, newPathList):
+    #     for i in range(len(oldPathList)):
+    #         oldPath = oldPathList[i]
+    #         newPath = newPathList[i]
+    #         for j in range(len(oldPath.placeList)):
+    #             if oldPath.placeList[j] != newPath.placeList[j]:
+    #                 return True
+    #     return False
+
     #eliminate all paths whose time is more than timeLeft
     shortPaths = []
     for path in allPaths:
         if path.timeToTake < timeLeft:
             shortPaths.append(path)
+
     subprocess.run(['echo', '-n', 'Number of time-bound paths:'])
     subprocess.run(['cat', '\n'],
-                   input = str(len(allPaths)), universal_newlines = True)
+                   input = str(len(shortPaths)), universal_newlines = True)
     subprocess.run('echo')
 
     #rank the remaining paths by their totalScore
@@ -156,7 +181,3 @@ def find_path(cleanPlacesDict, c1Places, c2Places,
 
     bestPath = orderedPaths[0]
     return bestPath
-
-
-    #if not brute force, then greedy! Every next place is the closest place.
-    #but this will need to take into account the onlineWeight Somehow.

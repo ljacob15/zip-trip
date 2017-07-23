@@ -2,6 +2,8 @@
 import pandas as pd
 from collections import OrderedDict
 import pdb
+import subprocess
+import math
 
 def generate_codes():
     #construct diciotnary mapping product types to productCodes
@@ -19,9 +21,14 @@ def generate_codes():
     foodCodesDict = {}
     for i in range(foodCodesDF.shape[0]):
         row = foodCodesDF.iloc[i]
-        key = row.iloc[1]
-        value = row.iloc[0]
-        foodCodesDict[key] = value
+        foodTypes = row.iloc[1]
+        foodTypes = foodTypes.lower()
+        foodTypeList = foodTypes.split(',')
+        for foodType in foodTypeList:
+            foodType = foodType.strip()
+        foodTypeTuple = tuple(foodTypeList)
+        foodCode = row.iloc[0]
+        foodCodesDict[foodTypeTuple] = foodCode
     return productCodesDict, foodCodesDict
 
 
@@ -32,6 +39,7 @@ def clean_places(placesDict, productCodesDict, foodCodesDict):
     for placeID in placesDict:
         #set food codes and prodcut codes variables
         currentPlace = placesDict[placeID]
+        #set product code
         setattr(currentPlace,"productCode", None)
         productType = currentPlace.productType
         if productType != -1:
@@ -40,21 +48,25 @@ def clean_places(placesDict, productCodesDict, foodCodesDict):
             productCode = productCodesDict[productType]
 #            assert type(productCode) == int, "productCode is not int"
             setattr(currentPlace, "productCode", productCode)
-        setattr(currentPlace,"foodCode", None)
+        #set list of foodCodes
+        setattr(currentPlace,"foodCodes", None)
         if currentPlace.foodType != -1:
             foodCodeList = []
-            foodTypeList = currentPlace.foodType.split(",")
-            for item in foodCodesDict:
-                for foodType in foodTypeList:
-                    if foodType in item:
-                        foodCodeList.append(foodCodesDict[item])
+            foodTypes = currentPlace.foodType.lower()
+            foodTypeList = foodTypes.split(',')
+            cleanFoodTypeList = []
+            for foodType in foodTypeList:
+                cleanFoodTypeList.append(foodType.strip())
+            for foodTypeTuple in foodCodesDict:
+                for foodType in cleanFoodTypeList:
+                    if foodType in foodTypeTuple:
+                        foodCodeList.append(foodCodesDict[foodTypeTuple])
+
             Set = set(foodCodeList)
             foodCodeList = list(Set)
-            foodCode = -1
             if len(foodCodeList) > 0:
-                foodCode = foodCodeList[0]
-#            assert type(foodCode) == int, "foodCode is not int"
-            setattr(currentPlace, "foodCode", foodCode)
+                foodCodes = foodCodeList
+            setattr(currentPlace, "foodCodes", foodCodes)
 
         #set variables for opening hour and closing hours
         hours = currentPlace.openHours
@@ -84,7 +96,8 @@ def clean_places(placesDict, productCodesDict, foodCodesDict):
     return placesDict
 
 def get_places(cleanPlacesDict, c1Categs, c2Categs,
-               terminal, timeLeft, currentTimeOG, userFoodCodes):
+               terminal, location, timeLeft,
+               currentTimeOG, userFoodCodes):
     '''cleanPlacesDict = dictionary mapping ids to places in the airport
     all place attributes are clean, numerical codes
     c1Categs = ranked list of categories that user is predicted to prefer
@@ -105,6 +118,11 @@ def get_places(cleanPlacesDict, c1Categs, c2Categs,
             c2Num = c2Nums[i]
     c1NarrowedCategs = c1Categs[:c1Num]
     c2NarrowedCategs = c2Categs[:c2Num]
+
+    subprocess.run("echo Bob's narrowed categories based on time:")
+    subprocess.run('cat', input = str(c1NarrowedCategs), universal_newlines = True)
+    subprocess.run('cat', input = str(c2NarrowedCategs), universal_newlines = True)
+    subprocess.run('echo')
     #now we have narrowed category lists that the user has time for (estimated)
     #next, find all places (in the relevant terminal) in those categories
 
@@ -142,7 +160,7 @@ def get_places(cleanPlacesDict, c1Categs, c2Categs,
                 class2CPMap[category].append(place)
 
     if userFoodCodes:
-        #if the user has food preferences, only return places of those preferences
+        #if the user has food preferences, UPDATE the path to return only places of those preferences
         # for category in class1CPMap:
         #     placeList = class1CPMap[category]
         #     for place in placeList:
@@ -151,11 +169,14 @@ def get_places(cleanPlacesDict, c1Categs, c2Categs,
 
         #if user has food preferences, DISPLAY those preferences in addition to the current path
         preferredPlaceList = []
-        for category in class1CPMap:
-            places = class1CPMap[category]
-            for place in places:
-                if place.foodCode in userFoodCodes:
-                    preferredPlaceList.append(place)
+        for placeID in cleanPlacesDict:
+            place = cleanPlacesDict[placeID]
+            if place.foodCodes:
+                for foodCode in place.foodCodes:
+                    if foodCode in userFoodCodes and (math.fabs(place.nearestGate - location) <= 5):
+                        preferredPlaceList.append(place)
+                        break
+        '''ideally return only open preferred places, but that's not implemented yet'''
         return class1CPMap, class2CPMap, preferredPlaceList
 
     return class1CPMap, class2CPMap, None
