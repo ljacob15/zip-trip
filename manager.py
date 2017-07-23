@@ -89,13 +89,20 @@ class RecommendationManager():
         #use Bob's ranked Category lists and the timeLeft to generate
         #a narrowed down list of categories we'd like bob to visit.
         #Then use that list to generate a list of specific places bob might like to visit.
-        c1PlacesDict, c2PlacesDict = pathPreProc.get_places(cleanPlacesDict,
-                                                            c1Categs,
-                                                            c2Categs,
-                                                            self.terminal,
-                                                            self.timeLeft,
-                                                            self.currentTime,
-                                                            self.userFoodCodes)
+        c1PlacesDict, c2PlacesDict, preferredPlaces = pathPreProc.get_places(cleanPlacesDict,
+                                                                            c1Categs,
+                                                                            c2Categs,
+                                                                            self.terminal,
+                                                                            self.timeLeft,
+                                                                            self.currentTime,
+                                                                            self.userFoodCodes)
+        if preferredPlaces:
+            placeNames = []
+            for place in preferredPlaces:
+                placeNames.append(place.placeName)
+            subprocess.run("echo Bob's new preferences:")
+            subprocess.run('cat', input = preferredPlaces, universal_newlines = True)
+            subprocess.run('echo')
 
         #from the places, construct paths from current location through Places and to gate.
         #use the search algorithm to find the best path (shortest and best onlineRating)

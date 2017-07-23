@@ -90,7 +90,9 @@ def get_places(cleanPlacesDict, c1Categs, c2Categs,
     c1Categs = ranked list of categories that user is predicted to prefer
     (same for c2Categs)
     terminal = 0 for terminal D, 1 for terminal E
-    timeLeft = integer value, time remaining in minutes'''
+    timeLeft = integer value, time remaining in minutes
+    operation: narrows categories based on time left,
+    gets only open places for each cateogry'''
     #narrow down the category lists based on the timeLeft
     timesLeft = [240, 180, 120, 90, 60, 45, 30, 20]
     c1Nums =    [6, 5, 4, 3, 2, 1, 1, 0]
@@ -111,6 +113,7 @@ def get_places(cleanPlacesDict, c1Categs, c2Categs,
     class1CPMap = OrderedDict()
     class2CPMap = OrderedDict()
 
+    #get only open places for each of the narrowed categories
     for category in c1NarrowedCategs:
         class1CPMap[category] = []
         for placeID in cleanPlacesDict:
@@ -130,14 +133,6 @@ def get_places(cleanPlacesDict, c1Categs, c2Categs,
                     openTag = True
             if place.categoryCode == category and place.terminal == terminal and openTag == True:
                 class1CPMap[category].append(place)
-    #if the user has food preferences, only return places of those preferences
-    if userFoodCodes:
-        for category in class1CPMap:
-            placeList = class1CPMap[category]
-            for place in placeList:
-                if place.foodCode and place.foodCode not in userFoodCodes:
-                        placeList.remove(place)
-
 
     for category in c2NarrowedCategs:
         class2CPMap[category] = []
@@ -145,7 +140,25 @@ def get_places(cleanPlacesDict, c1Categs, c2Categs,
             place = cleanPlacesDict[placeID]
             if place.categoryCode == category and place.terminal == terminal and openTag == True:
                 class2CPMap[category].append(place)
-    return class1CPMap, class2CPMap
+
+    if userFoodCodes:
+        #if the user has food preferences, only return places of those preferences
+        # for category in class1CPMap:
+        #     placeList = class1CPMap[category]
+        #     for place in placeList:
+        #         if place.foodCode and place.foodCode not in userFoodCodes:
+        #                 placeList.remove(place)
+
+        #if user has food preferences, DISPLAY those preferences in addition to the current path
+        preferredPlaceList = []
+        for category in class1CPMap:
+            places = class1CPMap[category]
+            for place in places:
+                if place.foodCode in userFoodCodes:
+                    preferredPlaceList.append(place)
+        return class1CPMap, class2CPMap, preferredPlaceList
+
+    return class1CPMap, class2CPMap, None
 
 
 

@@ -1,5 +1,5 @@
 import math
-import itertools
+from itertools import product, permutations
 import pdb
 import subprocess
 
@@ -110,17 +110,29 @@ def find_path(cleanPlacesDict, c1Places, c2Places,
     operation: uses brute force to construct all possible paths from user
     through one place in each category and to the Gate.
     Finds best path regarding distance and online rating.'''
-    allPaths = []
     combinedDict = {**c1Places, **c2Places}
     categoryPlaceList = []
     for category in combinedDict:
         if len(combinedDict[category]) > 0:
             categoryPlaceList.append(combinedDict[category])
     import pdb; pdb.set_trace()
-    for path in itertools.product(*categoryPlaceList):
+    combos = []
+    for path in product(*categoryPlaceList):
+        combos.append(path)
+    allPaths = []
+    #without permutations
+    for path in combos:
         pathObject = Path(path, flightGate, location, timeLeft,
                           timeWeight, onlineWeight)
         allPaths.append(pathObject)
+
+    #with permutations
+    # for path in combos:
+    #     for ordering in permutations(path):
+    #         pathObject = Path(ordering, flightGate, location, timeLeft,
+    #                           timeWeight, onlineWeight)
+    #         allPaths.append(pathObject)
+
     # print("Number of possible paths:" + str(len(allPaths)))
     subprocess.run(['echo', '-n', 'Number of possible paths:'])
     subprocess.run(['cat', '\n'],
