@@ -3,10 +3,10 @@ from datetime import datetime
 import subprocess
 
 def main():
-    #Bob = things.create_fake_user()
-    messages = ["echo Standard Engine: When Bob clears security",
-                "echo Updated Engine: When Bob's flight is delayed",
-                "echo Updated Engine: When Bob changes his preferences"]
+    #Robert = things.create_fake_user()
+    messages = ["echo Standard Engine: When Robert clears security",
+                "echo Updated Engine: When Robert's flight is delayed",
+                "echo Updated Engine: When Robert changes his preferences"]
     engines = [manager.RecommendationManager(),
                manager.RecommendationManager(currentTime = datetime(2017,7,19,9,20),
                                              boardingTime = datetime(2017,7,19,12,00),

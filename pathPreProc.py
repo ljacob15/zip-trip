@@ -119,7 +119,7 @@ def get_places(cleanPlacesDict, c1Categs, c2Categs,
     c1NarrowedCategs = c1Categs[:c1Num]
     c2NarrowedCategs = c2Categs[:c2Num]
 
-    subprocess.run("echo Bob's narrowed categories based on time:")
+    subprocess.run("echo Robert's narrowed categories based on time:")
     subprocess.run('cat', input = str(c1NarrowedCategs), universal_newlines = True)
     subprocess.run('cat', input = str(c2NarrowedCategs), universal_newlines = True)
     subprocess.run('echo')
