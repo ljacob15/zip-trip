@@ -41,25 +41,29 @@ class RecommendationManager():
         #use the engine to train, test, and get Robert's userTypes
         userTrainDF = extractor.extract_users(filer = self.trainSet)
         # print("Training set constructed")
-        proc = subprocess.run("echo Training set constructed")
+        # proc = subprocess.run("echo Training set constructed")
 
         userTestDF = extractor.extract_users(filer = self.testSet)
         # print("Testing set constructed")
-        subprocess.run("echo Testing set constructed")
+        # subprocess.run("echo Testing set constructed")
 
         userTrainMatrix, labels = preferencePreProc.clean_users(userTrainDF)
         userTestMatrix = preferencePreProc.clean_users(userTestDF)
         # print("Training and testing sets cleaned")
-        subprocess.run("echo Training and testing sets cleaned")
+        # subprocess.run("echo Training and testing sets cleaned")
 
         #return userTrainMatrix, labels, userTestMatrix
         RobertProbs = preferenceEngine.predict_user_type(userTrainMatrix, labels,
                                                      userTestMatrix)
-        RobertOut = str(RobertProbs)
+        shortProbs = []
+        for prob in RobertProbs:
+            shortProbs.append(round(prob,3))
+        RobertOut = str(shortProbs)
         # print("Robert's preferences predicted:")
         subprocess.run("echo Robert's preferences predicted:")
         subprocess.run('cat', input = RobertOut, universal_newlines = True)
         subprocess.run('echo')
+        input("Press Enter to continue...")
 
         # print(RobertProbs)
 
@@ -73,6 +77,7 @@ class RecommendationManager():
         subprocess.run('cat', input = c1Out, universal_newlines = True)
         subprocess.run('cat', input = c2Out, universal_newlines = True)
         subprocess.run('echo')
+        input("Press Enter to continue...")
 
 
         '''END PHASE 1, START PHASE 2'''
