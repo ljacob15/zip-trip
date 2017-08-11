@@ -5,18 +5,22 @@ import pdb
 import subprocess
 import math
 
+
 def generate_codes():
+    '''
+    Generates codes mapping food/product types in the airport to #s.
+    '''
     #construct diciotnary mapping product types to productCodes
     productCodesDF = pd.read_excel('productCodes.xlsx', header = 0)
     productCodesDict = {}
     for i in range(productCodesDF.shape[0]):
         row = productCodesDF.iloc[i]
-        key = row.iloc[1].lower()
-        key = key.strip()
-        value = row.iloc[0]
-        productCodesDict[key] = value
+        productType = row.iloc[1].lower()
+        productType = productType.strip()
+        productCode = row.iloc[0]
+        productCodesDict[productType] = productCode
 
-    #construct diciotnary mapping product types to productCodes
+    #construct diciotnary mapping food types to foodCodes
     foodCodesDF = pd.read_excel('foodCodes.xlsx', header = 0)
     foodCodesDict = {}
     for i in range(foodCodesDF.shape[0]):
@@ -29,6 +33,7 @@ def generate_codes():
         foodTypeTuple = tuple(foodTypeList)
         foodCode = row.iloc[0]
         foodCodesDict[foodTypeTuple] = foodCode
+
     return productCodesDict, foodCodesDict
 
 
@@ -36,6 +41,7 @@ def clean_places(placesDict, productCodesDict, foodCodesDict):
     '''placesDict = raw dictionary of all Places
     productCodeDict = dict mapping product Type to product code
     foodCodeDict = dict mapping food Type to food code'''
+
     for placeID in placesDict:
         #set food codes and prodcut codes variables
         currentPlace = placesDict[placeID]
@@ -48,6 +54,7 @@ def clean_places(placesDict, productCodesDict, foodCodesDict):
             productCode = productCodesDict[productType]
 #            assert type(productCode) == int, "productCode is not int"
             setattr(currentPlace, "productCode", productCode)
+
         #set list of foodCodes
         setattr(currentPlace,"foodCodes", None)
         if currentPlace.foodType != -1:
@@ -62,6 +69,7 @@ def clean_places(placesDict, productCodesDict, foodCodesDict):
                     if foodType in foodTypeTuple:
                         foodCodeList.append(foodCodesDict[foodTypeTuple])
 
+            #eliminate duplicates
             Set = set(foodCodeList)
             foodCodeList = list(Set)
             if len(foodCodeList) > 0:
@@ -82,7 +90,7 @@ def clean_places(placesDict, productCodesDict, foodCodesDict):
         setattr(currentPlace, "hoursList", hoursList)
 
         #set terminal codes (D = 0, E = 1)
-        if currentPlace.terminal != ("D" or "E"):
+        if currentPlace.terminal not in ['D', 'E']:
             currentPlace.terminal = -1
         else:
             terminalCodes = {"D": 0, "E": 1}
@@ -92,7 +100,8 @@ def clean_places(placesDict, productCodesDict, foodCodesDict):
         if type(currentPlace.nearestGate) != None and currentPlace.nearestGate != -1:
             currentPlace.nearestGate = currentPlace.nearestGate.strip()
             currentPlace.nearestGate = int(currentPlace.nearestGate[1:])
-    # pdb.set_trace()
+
+    # import pdb; pdb.set_trace()
     return placesDict
 
 def get_places(cleanPlacesDict, c1Categs, c2Categs,
@@ -108,7 +117,7 @@ def get_places(cleanPlacesDict, c1Categs, c2Categs,
     gets only open places for each cateogry'''
     #narrow down the category lists based on the timeLeft
     timesLeft = [240, 180, 120, 90, 60, 45, 30, 20]
-    c1Nums =    [6, 5, 4, 3, 2, 1, 1, 0]
+    c1Nums =    [4, 3, 3, 2, 2, 1, 1, 0]
     c2Nums =    [5, 4, 3, 3, 2, 2, 1, 1]
     c1Num = 6
     c2Num = 7
@@ -156,7 +165,7 @@ def get_places(cleanPlacesDict, c1Categs, c2Categs,
         class2CPMap[category] = []
         for placeID in cleanPlacesDict:
             place = cleanPlacesDict[placeID]
-            if place.categoryCode == category and place.terminal == terminal and openTag == True:
+            if place.categoryCode == category and place.terminal == terminal: #and openTag == True:
                 class2CPMap[category].append(place)
 
     if userFoodCodes:
@@ -178,6 +187,8 @@ def get_places(cleanPlacesDict, c1Categs, c2Categs,
                         break
         '''ideally return only open preferred places, but that's not implemented yet'''
         return class1CPMap, class2CPMap, preferredPlaceList
+
+    # import pdb; pdb.set_trace()
 
     return class1CPMap, class2CPMap, None
 

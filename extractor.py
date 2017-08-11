@@ -4,41 +4,37 @@ import things
 import pdb
 
 def extract_places(filer = 'placeAttributes.xlsx'):
-    #this list will store the places, indexed by their placeID's.
+    '''
+    Gets place data from specified file
+    Returns: placesDict: Dictionary mapping place ID to Place object.
+    Place object contains all attributes of the given place.
+    '''
+
     placesDict = {}
     dataFrame = pd.read_excel(filer, header = 0, index_col = 0 )
-    #iterate through each row, constructing the place object and adding to dict
 
+    #list of titles for each place attribute
     columnsList = list(dataFrame.columns.values)
+
+    #iterate through each row, constructing the place object and adding to dict
     for row in range(dataFrame.shape[0]):
         #extract the place
         currentPlace = dataFrame.iloc[row]
-        attributeDict = {}
         #construct diciontary of placeAttributes to feed into object constructor
-#        import pdb; pdb.set_trace()
+        attributeDict = {}
         for i in range(currentPlace.shape[0]):
             columnName = columnsList[i]
             columnValue = currentPlace.loc[columnName]
             attributeDict[columnName] = columnValue
-        #construct the Place
+        #construct the Place object
         placeObject = things.Place(attributeDict = attributeDict)
+        #add thr new place object to placesDict
         idNum = placeObject.get_id()
-        #add new Place to dictionary
         placesDict[idNum] = placeObject
-    # pdb.set_trace()
+
     return placesDict
 
 def extract_users(filer = 'userTrainData.xlsx'):
     #get user info from csv
     dataFrame = pd.read_excel(filer, header = 0, index_col = 0 )
-    # pdb.set_trace()
     return dataFrame
-
-
-'''
-id = place.loc("id"),
-name = place.loc("name"),
-terminal = place.loc("terminal"),
-className = place.lod("class"),
-cateory = place.loc("category")
-'''

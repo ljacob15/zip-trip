@@ -5,14 +5,22 @@ import pdb
 
 
 def predict_user_type(trainMatrix, labels, testMatrix,):
-    # import pdb; pdb.set_trace()
+    '''
+    Trains and tests KNN algorithm
+    '''
 
+    #train machine
     clf = KNeighborsClassifier(n_neighbors = 10, weights = 'distance')
     clf.fit(trainMatrix, labels)
+
+    #grab Robert's userFlightData from the testing dataset
     bob = testMatrix[3]
     bob = bob.reshape(1,-1)
+
+    #test machine
     predictions = clf.predict_proba(bob)
     predictions = predictions.reshape(-1)
     predictions = predictions.tolist()
-    # pdb.set_trace()
+
+    
     return predictions

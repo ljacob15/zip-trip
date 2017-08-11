@@ -5,6 +5,7 @@ import preferenceEngine
 import preferencePostProc
 import pathPreProc
 import pathConstructor
+from decorators import timer
 
 from datetime import datetime
 import subprocess
@@ -13,6 +14,10 @@ import pdb
 
 
 class RecommendationManager():
+    '''
+    Manager for the recommendation system. Takes in data relating to flight
+    and location.
+    '''
     def __init__(self, timeWeight = .65, onlineWeight = .35, userPrefWeight = 0,
                  trainSet = 'userTrainData.xlsx',
                  testSet = 'userTestData.xlsx',
@@ -35,9 +40,17 @@ class RecommendationManager():
         self.location = location
         self.userFoodCodes = userFoodCodes
 
+    @timer
     def generate_recommendations(self):
-
-        #Robert will be User #1 from the userTestData
+        '''
+        Generates recommendations
+        Trains KNN on dummy user flight data
+        Tests KNN on new data point
+        Generates preferred categories of places
+        Generates all possible paths, shortens possible paths based on time
+        Returns highest scoring path
+        '''
+        #traveler's name is Robert
         #use the engine to train, test, and get Robert's userTypes
         userTrainDF = extractor.extract_users(filer = self.trainSet)
         # print("Training set constructed")
@@ -55,6 +68,8 @@ class RecommendationManager():
         #return userTrainMatrix, labels, userTestMatrix
         RobertProbs = preferenceEngine.predict_user_type(userTrainMatrix, labels,
                                                      userTestMatrix)
+
+        #round the machine output for aesthetic printing purposes
         shortProbs = []
         for prob in RobertProbs:
             shortProbs.append(round(prob,3))
@@ -93,7 +108,8 @@ class RecommendationManager():
 
         #use Robert's ranked Category lists and the timeLeft to generate
         #a narrowed down list of categories we'd like Robert to visit.
-        #Then use that list to generate a list of specific places Robert might like to visit.
+        #Then use that Narrowed category list to generate
+        #a list of specific places Robert might like to visit.
         c1PlacesDict, c2PlacesDict, preferredPlaces = pathPreProc.get_places(cleanPlacesDict,
                                                                             c1Categs,
                                                                             c2Categs,
@@ -101,7 +117,8 @@ class RecommendationManager():
                                                                             self.location,
                                                                             self.timeLeft,
                                                                             self.currentTime,
-                                                                            self.userFoodCodes)
+                                                                        self.userFoodCodes)
+        #printing code
         if preferredPlaces:
             placeNames = []
             for place in preferredPlaces:

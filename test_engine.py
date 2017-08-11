@@ -1,4 +1,6 @@
 import manager
+import decorators
+
 from datetime import datetime
 import subprocess
 
@@ -22,14 +24,11 @@ def main():
 def run(initialMessage, engine):
     subprocess.run(initialMessage)
     print()
-    startTime = datetime.now()
-    rm = engine
-    final = rm.generate_recommendations()
-    endTime = datetime.now()
+    final, timeTaken = engine.generate_recommendations()
     input("Process complete. Press Enter for engine output.")
     print("-------------------------")
     print(final)
-    print("Total Time Taken = " + str(endTime - startTime))
+    print("Total Time Taken = " + str(round(timeTaken,3)))
     print()
     input("Press Enter to continue...")
 
