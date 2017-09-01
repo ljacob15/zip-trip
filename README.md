@@ -9,3 +9,8 @@ shortest path algorithm (to maximize time efficiency).
 
 The engine should return a list of places in the airport that User is likely to enjoy. 
 The list should follow a rough path from User's current location to User's departure gate.
+
+
+One can test the machine with various parameters from "test_engine". 
+The "manager" file contains the main processes and organization of the engine.
+
